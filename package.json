@@ -1,0 +1,12 @@
+{
+  "name": "chacha",
+  "version": "0.0.0",
+  "description": "",
+  "main": "test.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nicholas Hobbs",
+  "license": "ISC"
+}
