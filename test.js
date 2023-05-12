@@ -1,7 +1,11 @@
 import test from 'node:test';
+import assert from 'node:assert';
 
-function rol(num, shift) {
-  return (num << shift) | (num >>> (32 - shift));
+function bound(n) {
+  if (n < 0) {
+    return n + 0xffffffff;
+  }
+  return n & 0xffffffff;
 }
 
 function hex(n) {
@@ -9,25 +13,33 @@ function hex(n) {
   return s.slice(s.length-8,s.length);
 }
 
+function rol(num, shift) {
+  return bound((num << shift) | (num >> (32 - shift)));
+}
+
+function add(x,y) {
+  return bound(x+y);
+}
+
+function xor(x,y) {
+  return bound(x^y);
+}
+
 function quarterRoundCalc(vec) {
-  vec.a += vec.b;
-  vec.a &= 0xffffffff;
-  vec.d ^= vec.a;
+  vec.a = add(vec.a, vec.b);
+  vec.d = xor(vec.d, vec.a);
   vec.d = rol(vec.d, 16);
 
-  vec.c += vec.d;
-  vec.c &= 0xffffffff
-  vec.b ^= vec.c;
+  vec.c = add(vec.c, vec.d);
+  vec.b = xor(vec.b, vec.c);
   vec.b = rol(vec.b, 12);
 
-  vec.a += vec.b;
-  vec.a &= 0xffffffff
-  vec.d ^= vec.a;
+  vec.a = add(vec.a, vec.b);
+  vec.d = xor(vec.d, vec.a);
   vec.d = rol(vec.d, 8);
 
-  vec.c += vec.d;
-  vec.c &= 0xffffffff
-  vec.b ^= vec.c;
+  vec.c = add(vec.c, vec.d);
+  vec.b = xor(vec.b, vec.c);
   vec.b = rol(vec.b, 7);
 
   return vec;
@@ -55,7 +67,7 @@ function quarterRound(slice, state){
   return state;
 }
 
-function add(stateA, stateB) {
+function addState(stateA, stateB) {
   const newState = [];
   for (let i=0; i<16; i++) {
     newState.push((stateA[i] + stateB[i]) & 0xffffffff);
@@ -75,7 +87,7 @@ export function doChaCha20(state){
     state = quarterRound([2, 7, 8, 13], state);
     state = quarterRound([3, 4, 9, 14], state);
   }
-  // state = add(state, initialState);
+  // state = addState(state, initialState);
   return state;
 }
 
@@ -88,4 +100,16 @@ let state = [
 print(state);
 state = doChaCha20(state);
 print(state);
+
+test('addition works', () => {
+  assert.strictEqual(add(0x77777777,0x01234567), 0x789abcde);
+});
+
+test('xor works', () => {
+  assert.strictEqual(xor(0x01020304,0x789abcde), 0x7998bfda);
+});
+
+test('rol works', () => {
+  assert.strictEqual(rol(0x7998bfda,7), 0xcc5fed3c);
+});
 
