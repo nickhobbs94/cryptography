@@ -1,41 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert';
 
+const MASK = 0xffffffff;
+
 function hex(n) {
-  const s = ('00000000' + (n < 0 ? n + 0x100000000 : n).toString(16));
+  const s = ('00000000' + (n).toString(16));
   return s.slice(s.length-8,s.length);
 }
 
 function rol(num, shift) {
-  return ((num << shift) | (num >> (32 - shift)));
+  return ((num << shift) | (num >>> (32 - shift)));
 }
 
 function add(x,y) {
-  return (x+y) & 0xffffffff;
+  return (x+y);
 }
 
 function xor(x,y) {
   return (x^y);
-}
-
-function quarterRoundCalc(vec) {
-  vec.a = add(vec.a, vec.b);
-  vec.d = xor(vec.d, vec.a);
-  vec.d = rol(vec.d, 16);
-
-  vec.c = add(vec.c, vec.d);
-  vec.b = xor(vec.b, vec.c);
-  vec.b = rol(vec.b, 12);
-
-  vec.a = add(vec.a, vec.b);
-  vec.d = xor(vec.d, vec.a);
-  vec.d = rol(vec.d, 8);
-
-  vec.c = add(vec.c, vec.d);
-  vec.b = xor(vec.b, vec.c);
-  vec.b = rol(vec.b, 7);
-
-  return vec;
 }
 
 function print(state){
@@ -48,22 +30,28 @@ function print(state){
 }
 
 function quarterRound(slice, state){
-  const a = state[slice[0]];
-  const b = state[slice[1]];
-  const c = state[slice[2]];
-  const d = state[slice[3]];
-  const updated = quarterRoundCalc({a,b,c,d});
-  state[slice[0]] = updated.a;
-  state[slice[1]] = updated.b;
-  state[slice[2]] = updated.c;
-  state[slice[3]] = updated.d;
+  state[slice[0]] = add(state[slice[0]], state[slice[1]]);
+  state[slice[3]] = xor(state[slice[3]], state[slice[0]]);
+  state[slice[3]] = rol(state[slice[3]], 16);
+
+  state[slice[2]] = add(state[slice[2]], state[slice[3]]);
+  state[slice[1]] = xor(state[slice[1]], state[slice[2]]);
+  state[slice[1]] = rol(state[slice[1]], 12);
+
+  state[slice[0]] = add(state[slice[0]], state[slice[1]]);
+  state[slice[3]] = xor(state[slice[3]], state[slice[0]]);
+  state[slice[3]] = rol(state[slice[3]], 8);
+
+  state[slice[2]] = add(state[slice[2]], state[slice[3]]);
+  state[slice[1]] = xor(state[slice[1]], state[slice[2]]);
+  state[slice[1]] = rol(state[slice[1]], 7);
   return state;
 }
 
 function addState(stateA, stateB) {
   const newState = [];
   for (let i=0; i<16; i++) {
-    newState.push((stateA[i] + stateB[i]) & 0xffffffff);
+    newState.push((stateA[i] + stateB[i]) & MASK);
   }
   return newState;
 }
@@ -109,9 +97,37 @@ test('xor works', () => {
 });
 
 test('rol works', () => {
-  const state = new Uint32Array([0x7998bfda,0x789abcde]);
+  const state = new Uint32Array([0x7998bfda]);
   state[0] = rol(state[0], 7);
 
   assert.strictEqual(state[0], 0xcc5fed3c);
 });
 
+test('rol works 16', () => {
+  const state = new Uint32Array([0xfabcdeff]);
+  state[0] = rol(state[0], 16);
+
+  assert.strictEqual(state[0], 0xDEFFFABC);
+});
+
+test('quarter round', () => {
+  let state = new Uint32Array([
+    0x879531e0,  0xc5ecf37d,  0x516461b1,  0xc9a62f8a,
+    0x44c20ef3,  0x3390af7f,  0xd9fc690b,  0x2a5f714c,
+    0x53372767,  0xb00a5631,  0x974c541a,  0x359e9963,
+    0x5c971061,  0x3d631689,  0x2098d9d6,  0x91dbd320,
+  ]);
+
+  const slice = [2,7,8,13];
+
+  state = quarterRound(slice, state);
+
+  const desired = new Uint32Array([
+    0x879531e0,  0xc5ecf37d,  0xbdb886dc,  0xc9a62f8a,
+    0x44c20ef3,  0x3390af7f,  0xd9fc690b,  0xcfacafd2,
+    0xe46bea80,  0xb00a5631,  0x974c541a,  0x359e9963,
+    0x5c971061,  0xccc07c79,  0x2098d9d6,  0x91dbd320,
+  ]);
+
+  assert.deepStrictEqual(state, desired);
+});
