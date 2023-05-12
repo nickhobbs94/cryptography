@@ -72,16 +72,6 @@ export function doChaCha20(state){
   return state;
 }
 
-let state = [
-  0x61707865,  0x3320646e,  0x79622d32,  0x6b206574,
-  0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
-  0x13121110,  0x17161514,  0x1b1a1918,  0x1f1e1d1c,
-  0x00000001,  0x09000000,  0x4a000000,  0x00000000
-];
-print(state);
-state = doChaCha20(state);
-print(state);
-
 test('addition works', () => {
   const state = new Uint32Array([0x77777777,0x01234567]);
   state[0] = add(state[0], state[1]);
@@ -131,3 +121,22 @@ test('quarter round', () => {
 
   assert.deepStrictEqual(state, desired);
 });
+
+test('chacha rounds completed', () => {
+  let state = new Uint32Array([
+    0x61707865,  0x3320646e,  0x79622d32,  0x6b206574,
+    0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
+    0x13121110,  0x17161514,  0x1b1a1918,  0x1f1e1d1c,
+    0x00000001,  0x09000000,  0x4a000000,  0x00000000
+  ]);
+  state = doChaCha20(state);
+
+  const desired = new Uint32Array([
+    0x837778ab,  0xe238d763,  0xa67ae21e,  0x5950bb2f,
+    0xc4f2d0c7,  0xfc62bb2f,  0x8fa018fc,  0x3f5ec7b7,
+    0x335271c2,  0xf29489f3,  0xeabda8fc,  0x82e46ebd,
+    0xd19c12b4,  0xb04e16de,  0x9e83d0cb,  0x4e3c50a2,
+  ]);
+
+  assert.deepStrictEqual(state, desired);
+})
