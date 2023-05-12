@@ -1,28 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert';
 
-function bound(n) {
-  if (n < 0) {
-    return n + 0xffffffff;
-  }
-  return n & 0xffffffff;
-}
-
 function hex(n) {
-  const s = ('00000000' + (n < 0 ? n + 0xffffffff : n).toString(16));
+  const s = ('00000000' + (n < 0 ? n + 0x100000000 : n).toString(16));
   return s.slice(s.length-8,s.length);
 }
 
 function rol(num, shift) {
-  return bound((num << shift) | (num >> (32 - shift)));
+  return ((num << shift) | (num >> (32 - shift)));
 }
 
 function add(x,y) {
-  return bound(x+y);
+  return (x+y) & 0xffffffff;
 }
 
 function xor(x,y) {
-  return bound(x^y);
+  return (x^y);
 }
 
 function quarterRoundCalc(vec) {
@@ -102,14 +95,23 @@ state = doChaCha20(state);
 print(state);
 
 test('addition works', () => {
-  assert.strictEqual(add(0x77777777,0x01234567), 0x789abcde);
+  const state = new Uint32Array([0x77777777,0x01234567]);
+  state[0] = add(state[0], state[1]);
+
+  assert.strictEqual(state[0], 0x789abcde);
 });
 
 test('xor works', () => {
-  assert.strictEqual(xor(0x01020304,0x789abcde), 0x7998bfda);
+  const state = new Uint32Array([0x01020304,0x789abcde]);
+  state[0] = xor(state[0], state[1]);
+
+  assert.strictEqual(state[0], 0x7998bfda);
 });
 
 test('rol works', () => {
-  assert.strictEqual(rol(0x7998bfda,7), 0xcc5fed3c);
+  const state = new Uint32Array([0x7998bfda,0x789abcde]);
+  state[0] = rol(state[0], 7);
+
+  assert.strictEqual(state[0], 0xcc5fed3c);
 });
 
