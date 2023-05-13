@@ -1,20 +1,20 @@
 // poly1305
 
-export function octoload(str) {
-    let inputs = str.split(':').reverse().map(s => parseInt('0x'+s));
-    let result = new Uint8Array(inputs);
+function uintArrayToBigInt(arr) {
+    let result = BigInt(0);
+    for (let n of arr) {
+        result = result * 0x100n + BigInt(n);
+    }
     return result;
 }
 
+export function octoload(str) {
+    let inputs = str.split(':').reverse().map(s => BigInt('0x'+s));
+    return uintArrayToBigInt(inputs);
+}
+
 export function clamp(r) {
-    r[15-3] &= 15;
-    r[15-7] &= 15;
-    r[15-11] &= 15;
-    r[15-15] &= 15;
-    r[15-4] &= 252;
-    r[15-8] &= 252;
-    r[15-12] &= 252;
-    return r;
+    return r & 0x0ffffffc0ffffffc0ffffffc0fffffffn;
 }
 
 export function encodeString(s) {
@@ -28,7 +28,8 @@ export function blockClearText(s) {
     const result = [];
     const encoded = encodeString(s);
     for (let i=0; i<Math.ceil(encoded.length / BLOCK_LENGTH); i++) {
-        result.push(encoded.slice(i*BLOCK_LENGTH, (i+1)*BLOCK_LENGTH).reverse());
+        const section = encoded.slice(i*BLOCK_LENGTH, (i+1)*BLOCK_LENGTH).reverse();
+        result.push(uintArrayToBigInt(section));
     }
     return result;
 }
