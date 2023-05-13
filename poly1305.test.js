@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { octoload, clamp, encodeString } from './poly1305.js';
+import { octoload, clamp, encodeString, blockClearText } from './poly1305.js';
 
 const hexify = s => ('0'+s).slice(s.length-1)
 const serialise = r => Array.prototype.slice.call(r).map(i => i.toString(16)).map(hexify).join(':');
@@ -20,9 +20,20 @@ test('encoder right format', () => {
     assert.strictEqual(encodeString(message).length, 34);
 });
 
-test('simple test', () => {
-    const key = '85:d6:be:78:57:55:6d:33:7f:44:52:fe:42:d5:06:a8:01:03:80:8a:fb:0d:b2:fd:4a:bf:f6:af:41:49:f5:1b';
-    const s = '01:03:80:8a:fb:0d:b2:fd:4a:bf:f6:af:41:49:f5:1b';
-    const r = '85:d6:be:78:57:55:6d:33:7f:44:52:fe:42:d5:06:a8';
+test('block cleartext into 3 blocks when 34 bytes long', () => {
     const message = 'Cryptographic Forum Research Group';
+    assert.strictEqual(blockClearText(message).length, 3);
 });
+
+test('first block is correct', () => {
+    const message = 'Cryptographic Forum Research Group';
+    const desired = new Uint8Array([0x6f, 0x46, 0x20, 0x63, 0x69, 0x68, 0x70, 0x61, 0x72, 0x67, 0x6f, 0x74, 0x70, 0x79, 0x72, 0x43]);
+    assert.deepStrictEqual((blockClearText(message)[0]), desired);
+});
+
+// test('simple test', () => {
+//     const key = '85:d6:be:78:57:55:6d:33:7f:44:52:fe:42:d5:06:a8:01:03:80:8a:fb:0d:b2:fd:4a:bf:f6:af:41:49:f5:1b';
+//     const s = '01:03:80:8a:fb:0d:b2:fd:4a:bf:f6:af:41:49:f5:1b';
+//     const r = '85:d6:be:78:57:55:6d:33:7f:44:52:fe:42:d5:06:a8';
+//     const message = 'Cryptographic Forum Research Group';
+// });

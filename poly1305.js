@@ -22,3 +22,13 @@ export function encodeString(s) {
     return encoder.encode(s);
 }
 
+const BLOCK_LENGTH = 16;
+
+export function blockClearText(s) {
+    const result = [];
+    const encoded = encodeString(s);
+    for (let i=0; i<Math.ceil(encoded.length / BLOCK_LENGTH); i++) {
+        result.push(encoded.slice(i*BLOCK_LENGTH, (i+1)*BLOCK_LENGTH).reverse());
+    }
+    return result;
+}
