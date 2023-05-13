@@ -17,3 +17,8 @@ export function clamp(r) {
     return r;
 }
 
+export function encodeString(s) {
+    const encoder = new TextEncoder();
+    return encoder.encode(s);
+}
+
