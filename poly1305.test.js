@@ -31,6 +31,18 @@ test('first block is correct', () => {
     assert.deepStrictEqual((blockClearText(message)[0]), desired);
 });
 
+test('second block is correct', () => {
+    const message = 'Cryptographic Forum Research Group';
+    const desired = new Uint8Array([0x6f, 0x72, 0x47, 0x20, 0x68, 0x63, 0x72, 0x61, 0x65, 0x73, 0x65, 0x52, 0x20, 0x6d, 0x75, 0x72]);
+    assert.deepStrictEqual((blockClearText(message)[1]), desired);
+});
+
+test('final block is correct', () => {
+    const message = 'Cryptographic Forum Research Group';
+    const desired = new Uint8Array([0x70, 0x75]);
+    assert.deepStrictEqual((blockClearText(message)[2]), desired);
+});
+
 // test('simple test', () => {
 //     const key = '85:d6:be:78:57:55:6d:33:7f:44:52:fe:42:d5:06:a8:01:03:80:8a:fb:0d:b2:fd:4a:bf:f6:af:41:49:f5:1b';
 //     const s = '01:03:80:8a:fb:0d:b2:fd:4a:bf:f6:af:41:49:f5:1b';
