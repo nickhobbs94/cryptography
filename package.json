@@ -1,11 +1,11 @@
 {
-  "name": "chacha",
+  "name": "nhobb-cryptography",
   "version": "0.0.0",
   "description": "",
   "main": "test.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test"
   },
   "author": "Nicholas Hobbs",
   "license": "ISC"
