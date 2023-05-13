@@ -33,3 +33,40 @@ export function blockClearText(s) {
     }
     return result;
 }
+
+export function addBitAboveHighest(n) {
+    let i = 0n;
+    while (n >> i > 0) i += 8n;
+    return n + (1n << i);
+}
+
+const P = 2n ** 130n - 5n;
+
+export function updateAccumulator(acc, block, r) {
+    const paddedBlock = addBitAboveHighest(block);
+    return ((acc+paddedBlock)*r) % P;
+}
+
+const hexify = s => ('0'+s).slice(s.length-1)
+// const serialise = r => Array.prototype.slice.call(r).map(i => i.toString(16)).map(hexify).join(':');
+
+function serialise128bits(n) {
+    let result = [];
+    for (let i=0; i<16; i++) {
+        result.push(hexify((n & 0xffn).toString(16)));
+        n >>= 8n;
+    }
+    return result.join(':');
+}
+
+export function poly1305(sEncoded, rEncoded, messageRaw) {
+    const s = octoload(sEncoded);
+    const r = clamp(octoload(rEncoded));
+    const blocks = blockClearText(messageRaw);
+    let acc = 0n;
+    for (let block of blocks) {
+        acc = updateAccumulator(acc, block, r);
+        console.log(acc.toString(16));
+    }
+    return serialise128bits(s + acc);
+}
