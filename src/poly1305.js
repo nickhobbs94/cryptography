@@ -66,7 +66,6 @@ export function poly1305(sEncoded, rEncoded, messageRaw) {
     let acc = 0n;
     for (let block of blocks) {
         acc = updateAccumulator(acc, block, r);
-        console.log(acc.toString(16));
     }
     return serialise128bits(s + acc);
 }
