@@ -116,3 +116,8 @@ export function inverseCountCut(deck) {
     const secondSection = deck.slice(value);
     return [...secondSection, ...firstSection, card];
 }
+
+export function inverseTripleCut(deck) {
+    return tripleCut(deck); // well that's easy
+}
+

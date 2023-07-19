@@ -190,4 +190,21 @@ test('inverse count cut example 1', () => {
     assert.strictEqual(cipher.inverseCountCut(end).toString(), start.toString());
 });
 
+test('inverse triple cut example 1', () => {
+    const start = [2, 4, 6, cipher.jokerB, 5, 8, 7, 1, cipher.jokerA, 3, 9];
+    const end = [3, 9, cipher.jokerB, 5, 8, 7, 1, cipher.jokerA, 2, 4, 6];
+    assert.strictEqual(cipher.tripleCut(end).toString(), start.toString());
+});
+
+test('inverse triple cut example 2', () => {
+    const start = [cipher.jokerB, 5, 8, 7, 1, cipher.jokerA, 3, 9];
+    const end = [3, 9, cipher.jokerB, 5, 8, 7, 1, cipher.jokerA];
+    assert.strictEqual(cipher.tripleCut(end).toString(), start.toString());
+});
+
+test('inverse triple cut example 3', () => {
+    const start = [cipher.jokerB, 5, 8, 7, 1, cipher.jokerA];
+    const end = [cipher.jokerB, 5, 8, 7, 1, cipher.jokerA];
+    assert.strictEqual(cipher.tripleCut(end).toString(), start.toString());
+});
 
