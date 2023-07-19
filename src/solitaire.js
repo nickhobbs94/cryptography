@@ -106,3 +106,13 @@ export function generateKeystream(deck, length) {
     }
     return {deck, output: result};
 }
+
+/* inverse functions */
+
+export function inverseCountCut(deck) {
+    const card = deck.pop();
+    const value = deck.length - Math.min(card, 53);
+    const firstSection = deck.slice(0, value);
+    const secondSection = deck.slice(value);
+    return [...secondSection, ...firstSection, card];
+}
