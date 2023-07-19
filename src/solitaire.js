@@ -1,0 +1,69 @@
+// solitaire
+// from https://www.schneier.com/academic/solitaire/
+
+const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+const posmod = (n, r) => (((n) % r) + r) % r;
+
+export const toLetter = n => alphabet[posmod(n-1, alphabet.length)]
+
+export const toNumber = l => {
+    if (!alphabet.includes(l)) {
+        throw new Error(`Letter '${l}' not found in alphabet`);
+    }
+    return posmod(alphabet.indexOf(l), alphabet.length) + 1;
+};
+
+export function encryptWithKeystream(cleartext, keystream) {
+    if (cleartext.length > keystream.length) {
+        throw new Error(`Need more keystream length! ${cleartext.length} > ${keystream.length}`)
+    }
+
+    let result = '';
+    for (let i=0; i<cleartext.length; i++) {
+        const c = cleartext[i];
+        const k = keystream[i];
+        result += toLetter(toNumber(c) + toNumber(k));
+    }
+
+    return result;
+}
+
+
+/* generating the keystream below */
+
+export function shuffle() {
+    const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54];
+    const deck = cards.slice();
+    // from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    return deck;
+}
+
+export const jokerA = 53;
+export const jokerB = 54;
+
+function advanceSpecificJoker(deck, joker, amount) {
+    if (amount !== 1 && amount !== 2) throw new Error(`not implemented amount = ${amount}`);
+
+    const i = deck.indexOf(joker);
+    const cutBeforeRemove = deck.slice(0,i);
+    const cutAfterRemove = deck.slice(i+1);
+    if (cutAfterRemove.length > 0) {
+        const cutBeforeInsert = cutAfterRemove.slice(0,amount);
+        const cutAfterInsert = cutAfterRemove.slice(amount);
+        return [...cutBeforeRemove, ...cutBeforeInsert, joker, ...cutAfterInsert];
+    } else {
+        throw new Error("not implemented");
+    }
+}
+
+export function advanceJokers(deck) {
+    deck = advanceSpecificJoker(deck, jokerA, 1);
+    deck = advanceSpecificJoker(deck, jokerB, 2);
+    return deck;
+}
+
