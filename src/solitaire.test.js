@@ -193,18 +193,29 @@ test('inverse count cut example 1', () => {
 test('inverse triple cut example 1', () => {
     const start = [2, 4, 6, cipher.jokerB, 5, 8, 7, 1, cipher.jokerA, 3, 9];
     const end = [3, 9, cipher.jokerB, 5, 8, 7, 1, cipher.jokerA, 2, 4, 6];
-    assert.strictEqual(cipher.tripleCut(end).toString(), start.toString());
+    assert.strictEqual(cipher.inverseTripleCut(end).toString(), start.toString());
 });
 
 test('inverse triple cut example 2', () => {
     const start = [cipher.jokerB, 5, 8, 7, 1, cipher.jokerA, 3, 9];
     const end = [3, 9, cipher.jokerB, 5, 8, 7, 1, cipher.jokerA];
-    assert.strictEqual(cipher.tripleCut(end).toString(), start.toString());
+    assert.strictEqual(cipher.inverseTripleCut(end).toString(), start.toString());
 });
 
 test('inverse triple cut example 3', () => {
     const start = [cipher.jokerB, 5, 8, 7, 1, cipher.jokerA];
     const end = [cipher.jokerB, 5, 8, 7, 1, cipher.jokerA];
-    assert.strictEqual(cipher.tripleCut(end).toString(), start.toString());
+    assert.strictEqual(cipher.inverseTripleCut(end).toString(), start.toString());
 });
 
+test('inverse advance jokers example 1', () => {
+    const start = [cipher.jokerA, 7, 2, cipher.jokerB, 9, 4, 1];
+    const end = [7, cipher.jokerA, 2, 9, 4, cipher.jokerB, 1];
+    assert.strictEqual(cipher.inverseAdvanceJokers(end).toString(), start.toString());
+});
+
+// test('inverse advance jokers example 2', () => {
+//     const start = [3, cipher.jokerA, cipher.jokerB, 8, 9, 6];
+//     const end = [3, cipher.jokerA, 8, cipher.jokerB, 9, 6];
+//     assert.strictEqual(cipher.advanceJokers(start).toString(), end.toString());
+// });
