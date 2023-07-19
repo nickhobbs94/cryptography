@@ -208,14 +208,16 @@ test('inverse triple cut example 3', () => {
     assert.strictEqual(cipher.inverseTripleCut(end).toString(), start.toString());
 });
 
-test('inverse advance jokers example 1', () => {
+test('inverse advance joker to end', () => {
+    const start = [1, 2, 3, cipher.jokerA, cipher.jokerB];
+    const end = [1, 2, 3, cipher.jokerB, cipher.jokerA];
+    assert.strictEqual(cipher.advanceSpecificJoker(end, cipher.jokerA, -1).toString(), start.toString());
+});
+
+// this test is skipped because it's actually NOT invertible!
+test('inverse advance jokers example 1', {skip: true}, () => {
     const start = [cipher.jokerA, 7, 2, cipher.jokerB, 9, 4, 1];
     const end = [7, cipher.jokerA, 2, 9, 4, cipher.jokerB, 1];
     assert.strictEqual(cipher.inverseAdvanceJokers(end).toString(), start.toString());
 });
 
-// test('inverse advance jokers example 2', () => {
-//     const start = [3, cipher.jokerA, cipher.jokerB, 8, 9, 6];
-//     const end = [3, cipher.jokerA, 8, cipher.jokerB, 9, 6];
-//     assert.strictEqual(cipher.advanceJokers(start).toString(), end.toString());
-// });

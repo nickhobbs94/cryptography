@@ -47,20 +47,19 @@ export const jokerA = 53;
 export const jokerB = 54;
 
 export function advanceSpecificJoker(deck, joker, amount) {
-    if (amount !== 1 && amount !== 2) throw new Error(`not implemented amount = ${amount}`);
+    // if (amount !== 1 && amount !== 2) throw new Error(`not implemented amount = ${amount}`);
 
     const i = deck.indexOf(joker);
     const cutBeforeRemove = deck.slice(0,i);
     const cutAfterRemove = deck.slice(i+1);
-    if (cutAfterRemove.length > amount - 1) {
-        const cutBeforeInsert = cutAfterRemove.slice(0,amount);
-        const cutAfterInsert = cutAfterRemove.slice(amount);
-        return [...cutBeforeRemove, ...cutBeforeInsert, joker, ...cutAfterInsert];
-    } else {
-        const cutBeforeInsert = cutBeforeRemove.slice(0, amount - cutAfterRemove.length);
-        const cutAfterInsert = cutBeforeRemove.slice(amount - cutAfterRemove.length);
-        return [...cutBeforeInsert, joker, ...cutAfterInsert, ...cutAfterRemove];
-    }
+
+    deck = [...cutBeforeRemove, ...cutAfterRemove];
+
+    const insertIndex = posmod(i + amount - 1, deck.length) + 1;
+
+    deck = [...deck.slice(0,insertIndex),joker,...deck.slice(insertIndex)];
+
+    return deck;
 }
 
 export function advanceJokers(deck) {
@@ -121,3 +120,9 @@ export function inverseTripleCut(deck) {
     return tripleCut(deck); // well that's easy
 }
 
+// well damn, this isn't invertible
+export function inverseAdvanceJokers(deck) {
+    deck = advanceSpecificJoker(deck, jokerB, -2);
+    deck = advanceSpecificJoker(deck, jokerA, -1);
+    return deck;
+}
