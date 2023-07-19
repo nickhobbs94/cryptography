@@ -67,3 +67,41 @@ export function advanceJokers(deck) {
     return deck;
 }
 
+export function tripleCut(deck) {
+    const i = Math.min(deck.indexOf(jokerA), deck.indexOf(jokerB));
+    const j = Math.max(deck.indexOf(jokerA), deck.indexOf(jokerB));
+
+    const firstSection = deck.slice(0,i);
+    const middleSection = deck.slice(i,j+1);
+    const lastSection = deck.slice(j+1);
+    return [...lastSection, ...middleSection, ...firstSection];
+}
+
+export function countCut(deck) {
+    const card = deck.pop();
+    const value = Math.min(card, 53);
+    const firstSection = deck.slice(deck.length - value + 1);
+    const secondSection = deck.slice(0, deck.length - value + 1);
+    return [...firstSection, ...secondSection, card];
+}
+
+export function output(deck) {
+    const topCard = deck[0];
+    const value = Math.min(topCard, 53);
+    return deck[value];
+}
+
+export function generateKeystream(deck, length) {
+    let result = '';
+    while (result.length < length) {
+        deck = advanceJokers(deck);
+        deck = tripleCut(deck);
+        deck = countCut(deck);
+        const outputValue = output(deck);
+        if (outputValue < 53) {
+            result += toLetter(outputValue);
+        }
+    }
+    return result;
+}
+
