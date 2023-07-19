@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { toLetter, toNumber, encryptWithKeystream, jokerA, jokerB, advanceJokers, tripleCut, countCut } from './solitaire.js';
+import { advanceSpecificJoker, generateKeystream, toLetter, toNumber, encryptWithKeystream, jokerA, jokerB, advanceJokers, tripleCut, countCut, cards } from './solitaire.js';
 
 
 test('first letter', () => {
@@ -78,6 +78,24 @@ test('advance jokers example 2', () => {
     assert.strictEqual(advanceJokers(start).toString(), end.toString());
 });
 
+test('advance joker to end', () => {
+    const start = [1, 2, 3, jokerA, jokerB];
+    const end = [1, 2, 3, jokerB, jokerA];
+    assert.strictEqual(advanceSpecificJoker(start, jokerA, 1).toString(), end.toString());
+});
+
+test('advance jokers past end 1', () => {
+    const start = [1, 2, 3, jokerA];
+    const end = [1, jokerA, 2, 3];
+    assert.strictEqual(advanceSpecificJoker(start, jokerA, 1).toString(), end.toString());
+});
+
+test('advance jokers past end 2', () => {
+    const start = [1, 2, 3, jokerA, jokerB];
+    const end = [1, 2, jokerB, 3, jokerA];
+    assert.strictEqual(advanceSpecificJoker(start, jokerB, 2).toString(), end.toString());
+});
+
 test('triple cut example 1', () => {
     const start = [2, 4, 6, jokerB, 5, 8, 7, 1, jokerA, 3, 9];
     const end = [3, 9, jokerB, 5, 8, 7, 1, jokerA, 2, 4, 6];
@@ -97,7 +115,63 @@ test('triple cut example 3', () => {
 });
 
 test('count cut example 1', () => {
-    const start = [7, 50, 49, 48, 4, 5, 47, 46, 45, 44, 43, 42, 8, 9];
-    const end = [5, 47, 46, 45, 44, 43, 42, 8, 7, 50, 49, 48, 4, 9];
+    const start = [7, 50, 49, 48, 47, 46, 45, 44, 4, 5, 43, 42, 8, 9];
+    const end = [5, 43, 42, 8, 7, 50, 49, 48, 47, 46, 45, 44, 4, 9];
     assert.strictEqual(countCut(start).toString(), end.toString());
+});
+
+
+const range = (n,m) => Array.from(Array(m-n).keys()).map(x => x+n);
+
+test('unkeyed deck is correct', () => {
+    const deck = cards.slice();
+    assert.strictEqual(deck.toString(), [...range(1,53), jokerA, jokerB].toString());
+});
+
+test('unkeyed deck first advance joker', () => {
+    const deck = cards.slice();
+    const result = advanceSpecificJoker(deck, jokerA, 1);
+    const expected = [...range(1,53), jokerB, jokerA]
+    assert.strictEqual(result.toString(), expected.toString());
+});
+
+test('unkeyed deck second advance joker', () => {
+    const deck = [...range(1,53), jokerB, jokerA];
+    const result = advanceSpecificJoker(deck, jokerB, 2);
+    const expected = [1, jokerB, ...range(2, 53), jokerA];
+    assert.strictEqual(result.toString(), expected.toString());
+});
+
+test('unkeyed deck triple cut', () => {
+    const deck = [1, jokerB, ...range(2, 53), jokerA];
+    const result = tripleCut(deck);
+    const expected = [jokerB, ...range(2, 53), jokerA, 1];
+    assert.strictEqual(result.toString(), expected.toString());
+});
+
+test('unkeyed deck count cut', () => {
+    const deck = [jokerB, ...range(2, 53), jokerA, 1];
+    const result = countCut(deck);
+    const expected = [...range(2, 53), jokerA, jokerB, 1];
+    assert.strictEqual(result.toString(), expected.toString());
+});
+
+test('unkeyed deck first output', () => {
+    const deck = cards.slice();
+    const result = generateKeystream(deck, 1);
+    assert.strictEqual(result.output, 'D');
+});
+
+test('unkeyed deck first resulting deck state', () => {
+    const deck = cards.slice();
+    const result = generateKeystream(deck, 1);
+    const expected = [...Array.from(Array(51).keys()).map(n => n+2), jokerA, jokerB, 1];
+    assert.strictEqual(result.deck.toString(), expected.toString());
+});
+
+test('first ten outputs', () => {
+    const deck = cards.slice();
+    const expected = [4, 49, 10, 24, 8, 51, 44, 6, 4, 33].map(n => toLetter(n)).join('');
+    const result = generateKeystream(deck, 10);
+    assert.strictEqual(result.output, expected);
 });

@@ -31,9 +31,9 @@ export function encryptWithKeystream(cleartext, keystream) {
 
 
 /* generating the keystream below */
+export const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54];
 
 export function shuffle() {
-    const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54];
     const deck = cards.slice();
     // from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
     for (let i = deck.length - 1; i > 0; i--) {
@@ -46,18 +46,20 @@ export function shuffle() {
 export const jokerA = 53;
 export const jokerB = 54;
 
-function advanceSpecificJoker(deck, joker, amount) {
+export function advanceSpecificJoker(deck, joker, amount) {
     if (amount !== 1 && amount !== 2) throw new Error(`not implemented amount = ${amount}`);
 
     const i = deck.indexOf(joker);
     const cutBeforeRemove = deck.slice(0,i);
     const cutAfterRemove = deck.slice(i+1);
-    if (cutAfterRemove.length > 0) {
+    if (cutAfterRemove.length > amount - 1) {
         const cutBeforeInsert = cutAfterRemove.slice(0,amount);
         const cutAfterInsert = cutAfterRemove.slice(amount);
         return [...cutBeforeRemove, ...cutBeforeInsert, joker, ...cutAfterInsert];
     } else {
-        throw new Error("not implemented");
+        const cutBeforeInsert = cutBeforeRemove.slice(0, amount - cutAfterRemove.length);
+        const cutAfterInsert = cutBeforeRemove.slice(amount - cutAfterRemove.length);
+        return [...cutBeforeInsert, joker, ...cutAfterInsert, ...cutAfterRemove];
     }
 }
 
@@ -80,9 +82,9 @@ export function tripleCut(deck) {
 export function countCut(deck) {
     const card = deck.pop();
     const value = Math.min(card, 53);
-    const firstSection = deck.slice(deck.length - value + 1);
-    const secondSection = deck.slice(0, deck.length - value + 1);
-    return [...firstSection, ...secondSection, card];
+    const firstSection = deck.slice(0, value);
+    const secondSection = deck.slice(value);
+    return [...secondSection, ...firstSection, card];
 }
 
 export function output(deck) {
@@ -102,6 +104,5 @@ export function generateKeystream(deck, length) {
             result += toLetter(outputValue);
         }
     }
-    return result;
+    return {deck, output: result};
 }
-
