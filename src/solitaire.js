@@ -57,7 +57,14 @@ export function advanceSpecificJoker(deck, joker, amount) {
 
     const insertIndex = posmod(i + amount - 1, deck.length) + 1;
 
-    deck = [...deck.slice(0,insertIndex),joker,...deck.slice(insertIndex)];
+    let cutBeforeInsert = deck.slice(0,insertIndex);
+    let cutAfterInsert = deck.slice(insertIndex);
+
+    if (cutBeforeInsert.length === 0) {
+        cutBeforeInsert = cutAfterInsert;
+        cutAfterInsert = [];
+    }
+    deck = [...cutBeforeInsert, joker,...cutAfterInsert];
 
     return deck;
 }

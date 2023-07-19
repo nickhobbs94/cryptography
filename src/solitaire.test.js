@@ -214,10 +214,20 @@ test('inverse advance joker to end', () => {
     assert.strictEqual(cipher.advanceSpecificJoker(end, cipher.jokerA, -1).toString(), start.toString());
 });
 
-// this test is skipped because it's actually NOT invertible!
-test('inverse advance jokers example 1', {skip: true}, () => {
-    const start = [cipher.jokerA, 7, 2, cipher.jokerB, 9, 4, 1];
-    const end = [7, cipher.jokerA, 2, 9, 4, cipher.jokerB, 1];
-    assert.strictEqual(cipher.inverseAdvanceJokers(end).toString(), start.toString());
+test('inverse joker A movement skips start position', () => {
+    const deck = [1, cipher.jokerA, 2, 3, 4];
+    const invdeck = [1, 2, 3, 4, cipher.jokerA];
+    assert.strictEqual(cipher.advanceSpecificJoker(deck, cipher.jokerA, -1).toString(), invdeck.toString());
 });
 
+test('inverse joker B movement skips start position', () => {
+    const deck = [1, 2, cipher.jokerB, 3, 4];
+    const invdeck = [1, 2, 3, 4, cipher.jokerB];
+    assert.strictEqual(cipher.advanceSpecificJoker(deck, cipher.jokerB, -2).toString(), invdeck.toString());
+});
+
+test('inverse joker B movement can move to first valid position', () => {
+    const deck = [1, 2, 3, cipher.jokerB, 4];
+    const invdeck = [1, cipher.jokerB, 2, 3, 4];
+    assert.strictEqual(cipher.advanceSpecificJoker(deck, cipher.jokerB, -2).toString(), invdeck.toString());
+});
