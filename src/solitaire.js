@@ -133,3 +133,17 @@ export function inverseAdvanceJokers(deck) {
     deck = advanceSpecificJoker(deck, jokerA, -1);
     return deck;
 }
+
+/* Helper functions for visualisation */
+export function formatDeck(deck) {
+    const rowlen = 9;
+    let result = '';
+    for (let i=0; i<deck.length / rowlen; i++) {
+        result += deck.slice(i*rowlen, (i+1)*rowlen)
+                      .map(e => e.toString())
+                      .map(s => (' '+s).slice(s.length-1))
+                      .join(' ');
+        result += '\n';
+    }
+    return result;
+}
